@@ -1,3 +1,5 @@
+'use strict';
+
 const store = {
   items: [
     { id: cuid(), name: 'apples', checked: false },
@@ -5,7 +7,9 @@ const store = {
     { id: cuid(), name: 'milk', checked: true },
     { id: cuid(), name: 'bread', checked: false }
   ],
-  hideCheckedItems: false
+  hideCheckedItems: false,
+  newItemTitle: '',
+  titleChanged: false,
 };
 
 const generateItemElement = function (item) {
@@ -26,8 +30,13 @@ const generateItemElement = function (item) {
         <button class='shopping-item-delete js-item-delete'>
           <span class='button-label'>delete</span>
         </button>
+        <form class="js-shopping-list-rename">
+          <label for="shopping-item-rename">Edit Title</label>
+          <input type="text" class="js-item-rename-entry" name="shopping-item-rename" placeholder="new name here">
+          <button type="submit" class="js-item-rename">Submit</button>
+        </form>
       </div>
-    </li>`;
+    </li>`;    
 };
 
 const generateShoppingItemsString = function (shoppingList) {
@@ -51,6 +60,12 @@ const render = function () {
     items = items.filter(item => !item.checked);
   }
 
+  // if the title was changed, set the value back to false.
+
+  if (store.titleChanged) {
+    store.titleChanged = !store.titleChanged;
+  }
+
   /**
    * At this point, all filtering work has been 
    * done (or not done, if that's the current settings), 
@@ -60,6 +75,32 @@ const render = function () {
 
   // insert that HTML into the DOM
   $('.js-shopping-list').html(shoppingListItemsString);
+};
+
+const changeItemTitle = function(id, newName) {
+  console.log(`changeItemTitle sees ${id} and ${newName}`);
+  const foundItem = store.items.find(item => item.id === id);
+  foundItem.name = newName;
+  store.titleChanged = true; // this will change the logic in render
+  // Need to get ID of the element selected
+  // need to get the value of the new title typed
+  // need to assign the value of the new title that store.item[id].name
+};
+
+const handleChangeItemTitle = function() {
+  // event listener isnt working, probably targetting the wrong thing, but I think
+  // the logic is good
+  $('.js-shopping-list').on('click', '.js-item-rename', event => {
+    event.preventDefault();
+    console.log('working to change title');
+    const id = getItemIdFromElement(event.target);
+    console.log(id);
+    const changedItemName = $('.js-item-rename-entry').val();
+    console.log(changedItemName);
+    $('.js-item-rename-entry').val('');
+    changeItemTitle(id, changedItemName);
+    render();
+  });
 };
 
 const addItemToShoppingList = function (itemName) {
@@ -160,6 +201,7 @@ const handleShoppingList = function () {
   handleItemCheckClicked();
   handleDeleteItemClicked();
   handleToggleFilterClick();
+  handleChangeItemTitle();
 };
 
 // when the page loads, call `handleShoppingList`
