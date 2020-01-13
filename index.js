@@ -60,9 +60,11 @@ const render = function () {
     items = items.filter(item => !item.checked);
   }
 
-  // if the title was changed, set the value back to false.
+  // if the title was changed, it clears the value of store.newItemTitle
+  // and sets the value back to false.
 
   if (store.titleChanged) {
+    store.newItemTitle = '';
     store.titleChanged = !store.titleChanged;
   }
 
@@ -77,10 +79,9 @@ const render = function () {
   $('.js-shopping-list').html(shoppingListItemsString);
 };
 
-const changeItemTitle = function(id, newName) {
-  console.log(`changeItemTitle sees ${id} and ${newName}`);
+const changeItemTitle = function(id) {
   const foundItem = store.items.find(item => item.id === id);
-  foundItem.name = newName;
+  foundItem.name = store.newItemTitle;
   store.titleChanged = true; // this will change the logic in render
   // Need to get ID of the element selected
   // need to get the value of the new title typed
@@ -88,17 +89,12 @@ const changeItemTitle = function(id, newName) {
 };
 
 const handleChangeItemTitle = function() {
-  // event listener isnt working, probably targetting the wrong thing, but I think
-  // the logic is good
   $('.js-shopping-list').on('click', '.js-item-rename', event => {
     event.preventDefault();
-    console.log('working to change title');
     const id = getItemIdFromElement(event.target);
-    console.log(id);
-    const changedItemName = $('.js-item-rename-entry').val();
-    console.log(changedItemName);
+    store.newItemTitle = $('.js-item-rename-entry').val();
     $('.js-item-rename-entry').val('');
-    changeItemTitle(id, changedItemName);
+    changeItemTitle(id);
     render();
   });
 };
